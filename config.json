@@ -1,0 +1,154 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "type": "udp",
+        "tag": "internal",
+        "detour": "select",
+        "server": "192.168.168.109"
+      },
+      {
+        "type": "https",
+        "tag": "remote",
+        "detour": "select",
+        "server": "1.1.1.1"
+      },
+      {
+        "type": "udp",
+        "tag": "earthlink",
+        "detour": "hy2-out-alkadm",
+        "server": "109.224.14.2"
+      },
+      {
+        "type": "local",
+        "tag": "local"
+      }
+    ],
+    "rules": [
+      {
+        "domain_suffix": "mrhx.work",
+        "server": "internal"
+      },
+      {
+        "domain_suffix": "shabakaty.com",
+        "server": "earthlink"
+      },
+      {
+        "domain_suffix": "cee.buzz",
+        "server": "earthlink"
+      }
+    ],
+    "final": "remote",
+    "strategy": "prefer_ipv4"
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 2080
+    },
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "address": "172.19.0.1/30",
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "gvisor"
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "select",
+      "outbounds": [
+        "auto",
+        "hy2-out-hetz",
+        "hy2-out-alkadm"
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "urltest",
+      "tag": "auto",
+      "outbounds": [
+        "hy2-out-hetz",
+        "hy2-out-alkadm"
+      ],
+      "url": "http://cp.cloudflare.com/generate_204",
+      "interval": "5m0s",
+      "tolerance": 100
+    },
+    {
+      "type": "hysteria2",
+      "tag": "hy2-out-hetz",
+      "server": "142.132.131.102",
+      "server_port": 443,
+      "up_mbps": 200,
+      "down_mbps": 200,
+      "password": "eq2CbswQa6ZdaQU6Q5jitQ",
+      "tls": {
+        "enabled": true,
+        "server_name": "h2.gpubgm.com",
+        "alpn": "h3",
+        "certificate_public_key_sha256": "sbQiDmMjIBHvY8s8uSZG91FgV3UpESKyDAIfebTkI+s="
+      }
+    },
+    {
+      "type": "hysteria2",
+      "tag": "hy2-out-alkadm",
+      "server": "37.238.162.87",
+      "server_port": 443,
+      "up_mbps": 200,
+      "down_mbps": 200,
+      "password": "dnALMWablw-sJ4oCpM2tQg",
+      "tls": {
+        "enabled": true,
+        "server_name": "h2.gpubgm.com",
+        "alpn": "h3",
+        "certificate_public_key_sha256": "Tkvp1t0rOyPEyNzX8VszrSmiijWmrH8eGFgaHxyCxXo="
+      }
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "action": "sniff"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "domain_suffix": "mrhx.work",
+        "outbound": "hy2-out-hetz"
+      },
+      {
+        "domain_suffix": [
+          "shabakaty.com",
+          "cee.buzz"
+        ],
+        "outbound": "hy2-out-alkadm"
+      },
+      {
+        "ip_cidr": "10.252.0.0/16",
+        "outbound": "hy2-out-hetz"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      }
+    ],
+    "final": "select",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "local"
+  }
+}

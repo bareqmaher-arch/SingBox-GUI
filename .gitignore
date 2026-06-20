@@ -1,0 +1,33 @@
+# sing-box binaries (download separately)
+sing-box.exe
+libcronet.dll
+*.dll
+
+# Original downloaded archive
+*.zip
+*.gz
+sing-box-*/
+
+# PyInstaller output
+build/
+dist/
+*.spec
+
+# Runtime files
+_runtime_config.json
+build_log.txt
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Local version copies
+Singbox Versions/
+Singbox*/
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
